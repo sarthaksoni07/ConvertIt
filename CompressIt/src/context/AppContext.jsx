@@ -6,7 +6,8 @@ export function AppProvider({ children }) {
  
   const [files, setFiles] = useState([]);
 
-  
+  const [results,setResults]=useState([]);
+
   const [status, setStatus] = useState("idle");
   
 
@@ -27,7 +28,9 @@ export function AppProvider({ children }) {
         progress,
         setProgress,
         announcement,
-        setAnnouncement
+        setAnnouncement,
+        results,
+        setResults
       }}
     >
       {children}
