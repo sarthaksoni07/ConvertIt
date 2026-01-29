@@ -6,14 +6,22 @@ export default function ResultsList() {
   
   if (results.length === 0) return null;
 
-  function downloadFile(blob, name) {
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = name;
-    a.click();
-    URL.revokeObjectURL(url);
-  }
+ function downloadFile(blob, name) {
+  const url = URL.createObjectURL(blob);
+
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = name;
+  a.style.display = "none";
+
+  document.body.appendChild(a);
+  a.click();
+
+  document.body.removeChild(a);
+
+  // delay revoke slightly to avoid race condition
+  setTimeout(() => URL.revokeObjectURL(url), 100);
+}
 
   return (
     <>

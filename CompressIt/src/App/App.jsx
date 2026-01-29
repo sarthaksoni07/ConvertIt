@@ -25,7 +25,7 @@ export default function App() {
       {status === "done" && <p>Compression complete ✅</p>}
       {status === "failed" && <p>Compression Failed ❌</p>}
 
-      <ResultsList/>
+      {status === "done" && <ResultsList/>}
     </>
   );
 }
