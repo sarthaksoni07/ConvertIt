@@ -1,17 +1,25 @@
+
+import imageCompression from "browser-image-compression";
+
 self.onmessage = async (e) => {
-  const { file } = e.data;
+  try {
+    const { file } = e.data;
 
-  // simulate heavy compression work
-  await new Promise((resolve) => setTimeout(resolve, 1000));
+    const options = {
+      maxSizeMB: 1,           // target size
+      maxWidthOrHeight: 1920,
+      useWebWorker: false     // already inside worker
+    };
 
-  // Create a compressed blob (simulate compression by reducing size)
-  const compressedData = new Uint8Array(Math.floor(file.size * 0.6));
-  const compressedBlob = new Blob([compressedData], { type: file.type });
+    const compressedBlob = await imageCompression(file, options);
 
-  self.postMessage({
-    name: file.name,
-    originalSize: file.size,
-    compressedSize: compressedBlob.size,
-    blob: compressedBlob
-  });
+    self.postMessage({
+      name: file.name,
+      originalSize: file.size,
+      compressedSize: compressedBlob.size,
+      blob: compressedBlob
+    });
+  } catch (err) {
+    self.postMessage({ error: err.message });
+  }
 };

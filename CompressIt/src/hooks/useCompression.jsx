@@ -8,33 +8,45 @@ export default function useCompression() {
   async function startCompression() {
     if (files.length === 0) return;
 
+    // Validate all files first
+    for (let i = 0; i < files.length; i++) {
+      const file = files[i];
+      const isValidImage = file.type.startsWith("image/");
+      const isValidPdf = file.type === "application/pdf";
+
+      if (!isValidImage && !isValidPdf) {
+        console.warn("Unsupported file:", file.name);
+        setStatus("failed");
+        return;
+      }
+    }
+
     setStatus("compressing");
     setProgress(0);
-
-    const newResults = [];
 
     for (let i = 0; i < files.length; i++) {
       const file = files[i];
       let result;
-      if (file.type.startsWith("image/")) {
-        result = await compressImage(file);
-        setStatus("done");
-      } else if (file.type === "application/pdf") {
-        result = await compressPdf(file);
-        setStatus("done");
-      } else {
-        console.warn("Unsupported file:", file.name);
-        setStatus("failed");
-      }
+      try {
+        if (file.type.startsWith("image/")) {
+          result = await compressImage(file);
+        } else if (file.type === "application/pdf") {
+          result = await compressPdf(file);
+        }
 
-      if (result) {
-        newResults.push(result);
+        if (result && result.blob) {
+          setResults((prev) => [...prev, result]);
+        }
+      } catch (err) {
+        console.error("Compression error:", err);
+        setStatus("failed");
+        return;
       }
 
       const percent = Math.round(((i + 1) / files.length) * 100);
       setProgress(percent);
     }
-    setResults(newResults);
+    setStatus("done");
   }
 
   return { startCompression };
