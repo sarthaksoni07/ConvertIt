@@ -16,19 +16,22 @@ export default function useCompression() {
 
       if (file.type.startsWith("image/")) {
         await compressImage(file);
+        setStatus("done");
       }
        else if (file.type === "application/pdf") {
         await compressPdf(file);
+        setStatus("done");
       } 
       else {
         console.warn("Unsupported file:", file.name);
+        setStatus("failed");
       }
       
       const percent = Math.round(((i + 1) / files.length) * 100);
       setProgress(percent);
     }
 
-    setStatus("done");
+    
   }
 
   return { startCompression };

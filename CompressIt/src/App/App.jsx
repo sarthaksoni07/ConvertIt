@@ -2,8 +2,9 @@ import Announcement from "../components/Announcement";
 import FileUploader from "../components/FileUploader";
 import { useAppContext } from "../context/AppContext";
 import useCompression from "../hooks/useCompression";
+import ResultsList from "../components/ResultsList";
 export default function App() {
-  const { files, status , progress} = useAppContext();
+  const { files, status, progress } = useAppContext();
   const { startCompression } = useCompression();
 
   return (
@@ -22,6 +23,9 @@ export default function App() {
       {status === "compressing" && <p>Progress: {progress}%</p>}
 
       {status === "done" && <p>Compression complete ✅</p>}
+      {status === "failed" && <p>Compression Failed ❌</p>}
+
+      <ResultsList/>
     </>
   );
 }
