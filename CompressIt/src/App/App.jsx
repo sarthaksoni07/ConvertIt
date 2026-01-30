@@ -10,7 +10,7 @@ export default function App() {
   return (
     <>
       <h1>ConvertIt.</h1>
-      <h3>We Love to do it On0Device</h3>
+      <h3>We Love to do it On Device</h3>
       <Announcement />
       <FileUploader />
       <p>Status:{status}</p>
