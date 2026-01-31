@@ -1,5 +1,6 @@
 import { useAppContext } from "../context/AppContext";
 import { convertImgToPdf } from "../features/img-to-pdf/imgToPdf.service";
+import { convertPdfToImg } from "../features/pdf-to-img/pdfToImg.service";
 export default function useConversion() {
   const { files, setConvert, setProgress, setResults } = useAppContext();
 
@@ -9,10 +10,9 @@ export default function useConversion() {
     for (let i = 0; i < files.length; i++) {
       const file = files[i];
       const isValidImage = file.type.startsWith("image/");
-      //   const isValidPdf = file.type === "application/pdf";
+        const isValidPdf = file.type === "application/pdf";
 
-      //   if (!isValidImage && !isValidPdf) {
-      if (!isValidImage) {
+        if (!isValidImage && !isValidPdf) {
         console.warn("Unsupported file:", file.name);
         setConvert("failed");
         return;
@@ -28,16 +28,22 @@ export default function useConversion() {
       try {
         if (file.type.startsWith("image/")) {
           result = await convertImgToPdf(file);
-        }
-        //  else if (file.type === "application/pdf") {
-        //   result = await compressPdf(file);
-        // }
-
-        if (result && result.blob) {
-          setResults((prev) => [...prev, result]);
+          if (result && result.blob) {
+            setResults((prev) => [...prev, result]);
+          }
+        } else if (file.type === "application/pdf") {
+          result = await convertPdfToImg(file);
+          if (result && result.images) {
+            setResults((prev) => [...prev, ...result.images.map(img => ({
+              name: img.name,
+              originalSize: result.originalSize,
+              compressedSize: img.size,
+              blob: img.blob,
+            }))]);
+          }
         }
       } catch (err) {
-        console.error("Compression error:", err);
+        console.error("Conversion error:", err);
         setConvert("failed");
         return;
       }

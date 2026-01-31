@@ -1,5 +1,6 @@
 import Announcement from "../components/Announcement";
 import FileUploader from "../components/FileUploader";
+import Loading from "../components/Loading";
 import { useAppContext } from "../context/AppContext";
 import useCompression from "../hooks/useCompression";
 import ResultsList from "../components/ResultsList";
@@ -23,7 +24,12 @@ export default function App() {
       )}
       {status === "ready" && <button onClick={startConversion}>Convert</button>}
 
-      {status === "compressing" && <p>Progress: {progress}%</p>}
+      {status === "compressing" && (
+        <>
+          <p>Progress: {progress}%</p>
+          <Loading />
+        </>
+      )}
 
       {status === "done" && <p>Compression complete ✅</p>}
       {status === "failed" && <p>Compression Failed ❌</p>}
