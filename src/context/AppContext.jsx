@@ -3,19 +3,19 @@ import { createContext, useContext, useState } from "react";
 const AppContext = createContext(null);
 
 export function AppProvider({ children }) {
- 
   const [files, setFiles] = useState([]);
 
-  const [results,setResults]=useState([]);
+  const [results, setResults] = useState([]);
 
   const [status, setStatus] = useState("idle");
-  
 
   const [progress, setProgress] = useState(0);
 
+  const [convert, setConvert] = useState([]);
+
   const [announcement, setAnnouncement] = useState({
     message: "More features coming soon 🚀",
-    enabled: true
+    enabled: true,
   });
 
   return (
@@ -30,7 +30,9 @@ export function AppProvider({ children }) {
         announcement,
         setAnnouncement,
         results,
-        setResults
+        setResults,
+        convert,
+        setConvert,
       }}
     >
       {children}

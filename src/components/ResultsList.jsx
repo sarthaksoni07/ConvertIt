@@ -1,31 +1,30 @@
 import { useAppContext } from "../context/AppContext";
 
 export default function ResultsList() {
-
   const { results } = useAppContext();
-  
+
   if (results.length === 0) return null;
 
- function downloadFile(blob, name) {
-  const url = URL.createObjectURL(blob);
+  function downloadFile(blob, name) {
+    const url = URL.createObjectURL(blob);
 
-  const a = document.createElement("a");
-  a.href = url;
-  a.download = name;
-  a.style.display = "none";
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = name;
+    a.style.display = "none";
 
-  document.body.appendChild(a);
-  a.click();
+    document.body.appendChild(a);
+    a.click();
 
-  document.body.removeChild(a);
+    document.body.removeChild(a);
 
-  // delay revoke slightly to avoid race condition
-  setTimeout(() => URL.revokeObjectURL(url), 100);
-}
+    // delay revoke slightly to avoid race condition
+    setTimeout(() => URL.revokeObjectURL(url), 100);
+  }
 
   return (
     <>
-      <h3>Compressed files</h3>
+      <h3>Processed Files</h3>
       <p>Results count: {results.length}</p>
 
       <ul>
@@ -42,7 +41,6 @@ export default function ResultsList() {
             </button>
           </li>
         ))}
-
       </ul>
     </>
   );

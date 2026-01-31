@@ -3,9 +3,11 @@ import FileUploader from "../components/FileUploader";
 import { useAppContext } from "../context/AppContext";
 import useCompression from "../hooks/useCompression";
 import ResultsList from "../components/ResultsList";
+import useConversion from "../hooks/useConversion";
 export default function App() {
-  const { files, status, progress } = useAppContext();
+  const { files, status, progress, convert } = useAppContext();
   const { startCompression } = useCompression();
+  const { startConversion } = useConversion();
 
   return (
     <>
@@ -19,13 +21,16 @@ export default function App() {
       {status === "ready" && (
         <button onClick={startCompression}>Compress</button>
       )}
+      {status === "ready" && <button onClick={startConversion}>Convert</button>}
 
       {status === "compressing" && <p>Progress: {progress}%</p>}
 
       {status === "done" && <p>Compression complete ✅</p>}
       {status === "failed" && <p>Compression Failed ❌</p>}
+      {convert === "failed" && <p>Conversion Failed ❌</p>}
+      {convert === "done" && <p>Conversion complete ✅</p>}
 
-      {status === "done" && <ResultsList/>}
+      {(status === "done" || convert === "done") && <ResultsList />}
     </>
   );
 }
