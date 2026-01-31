@@ -2,7 +2,6 @@ import imageCompression from "browser-image-compression";
 self.onmessage = async (e) => {
   try {
     const { file } = e.data;
-
     const options = {
       maxSizeMB: 1, // target size
       maxWidthOrHeight: 1920,
