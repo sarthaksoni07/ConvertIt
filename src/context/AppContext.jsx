@@ -11,7 +11,7 @@ export function AppProvider({ children }) {
 
   const [progress, setProgress] = useState(0);
 
-  const [convert, setConvert] = useState([]);
+  const [convert, setConvert] = useState("idle");
 
   const [announcement, setAnnouncement] = useState({
     message: "More features coming soon 🚀",

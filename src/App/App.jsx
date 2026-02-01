@@ -5,6 +5,8 @@ import { useAppContext } from "../context/AppContext";
 import useCompression from "../hooks/useCompression";
 import ResultsList from "../components/ResultsList";
 import useConversion from "../hooks/useConversion";
+import { Routes, Route } from "react-router-dom";
+
 export default function App() {
   const { files, status, progress, convert } = useAppContext();
   const { startCompression } = useCompression();
@@ -12,31 +14,45 @@ export default function App() {
 
   return (
     <>
-      <h1>ConvertIt.</h1>
-      <h3>We Love to do it On Device</h3>
-      <Announcement />
-      <FileUploader />
-      <p>Status:{status}</p>
-      <p>Files Selected:{files.length}</p>
+      <Routes>
+        <Route
+          path="/"
+          element={
+            <>
+              <h1>ConvertIt.</h1>
+              <h3>We Love to do it On Device</h3>
+              <Announcement />
 
-      {status === "ready" && (
-        <button onClick={startCompression}>Compress</button>
-      )}
-      {status === "ready" && <button onClick={startConversion}>Convert</button>}
+              <FileUploader />
 
-      {status === "compressing" && (
-        <>
-          <p>Progress: {progress}%</p>
-          <Loading />
-        </>
-      )}
+              <p>Status:{status}</p>
+              <p>Files Selected:{files.length}</p>
 
-      {status === "done" && <p>Compression complete ✅</p>}
-      {status === "failed" && <p>Compression Failed ❌</p>}
-      {convert === "failed" && <p>Conversion Failed ❌</p>}
-      {convert === "done" && <p>Conversion complete ✅</p>}
+              {status === "ready" && (
+                <button onClick={startCompression}>Compress</button>
+              )}
+              {status === "ready" && (
+                <button onClick={startConversion}>Convert</button>
+              )}
 
-      {(status === "done" || convert === "done") && <ResultsList />}
+              {(status === "compressing" || convert === "converting") && (
+                <>
+                  <p>Progress: {progress}%</p>
+                  <Loading />
+                </>
+              )}
+
+              {status === "done" && <p>Compression complete ✅</p>}
+              {status === "failed" && <p>Compression Failed ❌</p>}
+              {convert === "failed" && <p>Conversion Failed ❌</p>}
+              {convert === "done" && <p>Conversion complete ✅</p>}
+
+              {(status === "done" || convert === "done") && <ResultsList />}
+            </>
+          }
+        />
+        <Route path="*" element={<h1>Error 404: Not Found</h1>} />
+      </Routes>
     </>
   );
 }
