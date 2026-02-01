@@ -5,7 +5,7 @@ import { useAppContext } from "../context/AppContext";
 import useCompression from "../hooks/useCompression";
 import ResultsList from "../components/ResultsList";
 import useConversion from "../hooks/useConversion";
-import { Routes, Route } from "react-router-dom";
+import { Routes, Route, Link } from "react-router-dom";
 
 export default function App() {
   const { files, status, progress, convert } = useAppContext();
@@ -51,7 +51,17 @@ export default function App() {
             </>
           }
         />
-        <Route path="*" element={<h1>Error 404: Not Found</h1>} />
+        <Route
+          path="*"
+          element={
+            <>
+              <h1>Error 404: Not Found</h1>
+              <Link to="/">
+                <button>Go to Main page</button>
+              </Link>
+            </>
+          }
+        />
       </Routes>
     </>
   );
