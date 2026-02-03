@@ -1,55 +1,29 @@
 import Announcement from "../components/Announcement";
-import FileUploader from "../components/FileUploader";
-import Loading from "../components/Loading";
 import { useAppContext } from "../context/AppContext";
-import useCompression from "../hooks/useCompression";
-import ResultsList from "../components/ResultsList";
-import useConversion from "../hooks/useConversion";
-import { Routes, Route, Link } from "react-router-dom";
-import MarkdownInput from "../components/MarkdownInput";
-
+// import useCompression from "../hooks/useCompression";
+// import ResultsList from "../components/ResultsList";
+// import useConversion from "../hooks/useConversion";
+import { Routes, Route, Link, useNavigate } from "react-router-dom";
+// import MarkdownInput from "../components/MarkdownInput";
+import { Home } from "../views/Home";
+import Convert from "../views/Convert";
+import MdToPdf from "../views/MdToPdf";
+import Compress from "../views/Compress";
+import NotFound from "../views/NotFound";
+import { useState } from "react";
+import Header from "../views/Head";
 export default function App() {
-  const { files, status, progress, convert } = useAppContext();
-  const { startCompression } = useCompression();
-  const { startConversion } = useConversion();
+  const { error, setError } = useState(false);
+
   return (
-    <>
+    
       <Routes>
-        <Route
-          path="/"
-          element={
-            <>
-              <h1>ConvertIt.</h1>
-              <h3>We Love to do it On Device</h3>
-              <Announcement />
-              <FileUploader />
-              <MarkdownInput />
-              <p>Status:{status}</p>
-              <p>Files Selected:{files.length}</p>
-
-              {status === "ready" && (
-                <button onClick={startCompression}>Compress</button>
-              )}
-              {status === "ready" && (
-                <button onClick={startConversion}>Convert</button>
-              )}
-
-              {(status === "compressing" || convert === "converting") && (
-                <>
-                  <p>Progress: {progress}%</p>
-                  <Loading />
-                </>
-              )}
-
-              {status === "done" && <p>Compression complete ✅</p>}
-              {status === "failed" && <p>Compression Failed ❌</p>}
-              {convert === "failed" && <p>Conversion Failed ❌</p>}
-              {convert === "done" && <p>Conversion complete ✅</p>}
-
-              {(status === "done" || convert === "done") && <ResultsList />}
-            </>
-          }
-        />
+        <Route element={<Header />}>
+        <Route path="/" element={<Home />} />
+        <Route path="/convert" element={<Convert />} />
+        <Route path="/compress" element={<Compress />} />
+        <Route path="/mdtopdf" element={<MdToPdf />} />
+        </Route>
         <Route
           path="*"
           element={
@@ -60,8 +34,7 @@ export default function App() {
               </Link>
             </>
           }
-        />
+          />
       </Routes>
-    </>
   );
 }

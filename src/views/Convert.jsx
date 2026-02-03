@@ -1,0 +1,32 @@
+import FileUploader from "../components/FileUploader";
+import useConversion from "../hooks/useConversion";
+import ResultsList from "../components/ResultsList";
+import { useAppContext } from "../context/AppContext";
+import Loading from "../components/Loading";
+import { useNavigate } from "react-router-dom";
+export default function Convert() {
+  const { files, status,setStatus, progress, convert } = useAppContext();
+  const { startConversion } = useConversion();
+  const navigate = useNavigate();
+  function handleClick() {
+    navigate("/");
+  }
+  return (
+    <>
+      <FileUploader />
+      <p>Status:{status}</p>
+      <p>Files Selected:{files.length}</p>
+      {status === "ready" && <button onClick={startConversion}>Convert</button>}
+      {(status === "compressing" || convert === "converting") && (
+        <>
+          <p>Progress: {progress}%</p>
+          <Loading />
+        </>
+      )}
+
+      {status === "done" && <p>Conversion complete ✅</p>}
+      {status === "failed" && <p>Conversion Failed ❌</p>}
+      <button onClick={handleClick}>Main Menu</button>
+    </>
+  );
+}
