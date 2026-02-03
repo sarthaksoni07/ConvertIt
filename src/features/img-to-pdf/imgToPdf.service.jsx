@@ -1,4 +1,4 @@
-export function convertImgToPdf(file, onProgress) {
+export function convertImgToPdf(files, onProgress) {
   return new Promise((resolve, reject) => {
     const worker = new Worker(
       new URL("./imgToPdf.worker.jsx", import.meta.url),
@@ -30,6 +30,8 @@ export function convertImgToPdf(file, onProgress) {
       worker.terminate();
     };
 
-    worker.postMessage({ file });
+    // Handle both single file and multiple files
+    const fileArray = Array.isArray(files) ? files : [files];
+    worker.postMessage({ files: fileArray });
   });
 }
