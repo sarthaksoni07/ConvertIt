@@ -1,6 +1,6 @@
 import { useNavigate } from "react-router-dom"
 
-export const Home=()=>{
+export default function Home(){
     const navigate = useNavigate();
     function handleCompress(){
         navigate("/compress");
