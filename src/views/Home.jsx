@@ -3,10 +3,10 @@ import { useNavigate } from "react-router-dom"
 export const Home=()=>{
     const navigate = useNavigate();
     function handleCompress(){
-        navigate("/Compress");
+        navigate("/compress");
     }
     function handleConvert(){
-        navigate("/Convert");
+        navigate("/convert");
     }
     function handleMdToPdf(){
         navigate("/mdtopdf");
