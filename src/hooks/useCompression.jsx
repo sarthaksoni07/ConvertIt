@@ -1,6 +1,4 @@
 import { useAppContext } from "../context/AppContext";
-import { compressImage } from "../features/img-compression/img.service";
-import { compressPdf } from "../features/pdf/pdf.service";
 
 export default function useCompression() {
   const { files, setStatus, setProgress, setResults } = useAppContext();
@@ -9,16 +7,34 @@ export default function useCompression() {
     if (files.length === 0) return;
 
     // Validate all files first
+    let hasImages = false;
+    let hasPdfs = false;
     for (let i = 0; i < files.length; i++) {
       const file = files[i];
       const isValidImage = file.type.startsWith("image/");
       const isValidPdf = file.type === "application/pdf";
+
+      if (isValidImage) hasImages = true;
+      if (isValidPdf) hasPdfs = true;
 
       if (!isValidImage && !isValidPdf) {
         console.warn("Unsupported file:", file.name);
         setStatus("failed");
         return;
       }
+    }
+
+    // Dynamically import the required services
+    let compressImage = null;
+    let compressPdf = null;
+
+    if (hasImages) {
+      const mod = await import("../features/img-compression/img.service");
+      compressImage = mod.compressImage;
+    }
+    if (hasPdfs) {
+      const mod = await import("../features/pdf/pdf.service");
+      compressPdf = mod.compressPdf;
     }
 
     setStatus("compressing");

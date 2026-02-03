@@ -1,22 +1,39 @@
 import { useAppContext } from "../context/AppContext";
-import { convertImgToPdf } from "../features/img-to-pdf/imgToPdf.service";
-import { convertPdfToImg } from "../features/pdf-to-img/pdfToImg.service";
+
 export default function useConversion() {
   const { files, setConvert, setProgress, setResults } = useAppContext();
 
   async function startConversion() {
     if (!files || files.length === 0) return;
 
+    let hasImages = false;
+    let hasPdfs = false;
     for (let i = 0; i < files.length; i++) {
       const file = files[i];
       const isValidImage = file.type.startsWith("image/");
         const isValidPdf = file.type === "application/pdf";
+
+        if (isValidImage) hasImages = true;
+        if (isValidPdf) hasPdfs = true;
 
         if (!isValidImage && !isValidPdf) {
         console.warn("Unsupported file:", file.name);
         setConvert("failed");
         return;
       }
+    }
+
+    // Dynamically import the required services
+    let convertImgToPdf = null;
+    let convertPdfToImg = null;
+
+    if (hasImages) {
+      const mod = await import("../features/img-to-pdf/imgToPdf.service");
+      convertImgToPdf = mod.convertImgToPdf;
+    }
+    if (hasPdfs) {
+      const mod = await import("../features/pdf-to-img/pdfToImg.service");
+      convertPdfToImg = mod.convertPdfToImg;
     }
 
     setConvert("converting");

@@ -6,12 +6,12 @@ import useCompression from "../hooks/useCompression";
 import ResultsList from "../components/ResultsList";
 import useConversion from "../hooks/useConversion";
 import { Routes, Route, Link } from "react-router-dom";
+import MarkdownInput from "../components/MarkdownInput";
 
 export default function App() {
   const { files, status, progress, convert } = useAppContext();
   const { startCompression } = useCompression();
   const { startConversion } = useConversion();
-
   return (
     <>
       <Routes>
@@ -22,9 +22,8 @@ export default function App() {
               <h1>ConvertIt.</h1>
               <h3>We Love to do it On Device</h3>
               <Announcement />
-
               <FileUploader />
-
+              <MarkdownInput />
               <p>Status:{status}</p>
               <p>Files Selected:{files.length}</p>
 

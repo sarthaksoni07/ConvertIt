@@ -1,50 +1,110 @@
-import * as pdfjsLib from "pdfjs-dist/legacy/build/pdf.mjs";
-import pdfWorker from "pdfjs-dist/legacy/build/pdf.worker.min.mjs?url";
+import * as pdfjsLib from "pdfjs-dist/build/pdf.mjs";
+import pdfWorker from "pdfjs-dist/build/pdf.worker.mjs?url";
 
 pdfjsLib.GlobalWorkerOptions.workerSrc = pdfWorker;
 
+self.document = {
+  createElement: (tagName) => {
+    if (tagName === 'canvas') {
+      return new OffscreenCanvas(1, 1);
+    }
+    throw new Error(`Unsupported element: ${tagName}`);
+  }
+};
+
+class OffscreenCanvasFactory {
+  create(width, height) {
+    return new OffscreenCanvas(width, height);
+  }
+
+  reset(canvas, width, height) {
+    canvas.width = width;
+    canvas.height = height;
+  }
+
+  destroy(canvas) {
+  }
+}
+
+const canvasFactory = new OffscreenCanvasFactory();
+
 self.onmessage = async (e) => {
   try {
+    if (typeof OffscreenCanvas === 'undefined') {
+      throw new Error('OffscreenCanvas is not supported in this browser.');
+    }
+
     const { file, scale = 2, imageType = "image/png" } = e.data;
 
     const pdfData = await file.arrayBuffer();
     const pdf = await pdfjsLib.getDocument({ data: pdfData }).promise;
 
+    if (pdf.isEncrypted) {
+      throw new Error('Encrypted PDFs are not supported.');
+    }
+
     const results = [];
     const totalPages = pdf.numPages;
 
     for (let pageNum = 1; pageNum <= totalPages; pageNum++) {
-      const page = await pdf.getPage(pageNum);
-      const viewport = page.getViewport({ scale });
+      try {
+        const page = await pdf.getPage(pageNum);
+        let viewport = page.getViewport({ scale });
 
-      const canvas = new OffscreenCanvas(
-        viewport.width,
-        viewport.height
-      );
-      const ctx = canvas.getContext("2d");
+        const maxWidth = 2048;
+        const maxHeight = 2048;
+        if (viewport.width > maxWidth || viewport.height > maxHeight) {
+          const scaleX = maxWidth / viewport.width;
+          const scaleY = maxHeight / viewport.height;
+          const newScale = Math.min(scale, scaleX, scaleY);
+          viewport = page.getViewport({ scale: newScale });
+        }
 
-      await page.render({
-        canvasContext: ctx,
-        viewport,
-      }).promise;
+        const canvas = new OffscreenCanvas(
+          viewport.width,
+          viewport.height
+        );
+        const ctx = canvas.getContext("2d");
 
-      const blob = await canvas.convertToBlob({
-        type: imageType,
-        quality: 0.95,
-      });
+        ctx.fillStyle = 'white';
+        ctx.fillRect(0, 0, viewport.width, viewport.height);
 
-      results.push({
-        name: `page-${pageNum}.png`,
-        blob,
-        size: blob.size,
-      });
+        await page.render({
+          canvasContext: ctx,
+          viewport,
+          canvasFactory,
+        }).promise;
+
+        const blob = await canvas.convertToBlob({
+          type: imageType,
+          quality: 0.95,
+        });
+
+        if (blob.size === 0) {
+          throw new Error(`Rendering resulted in empty image for page ${pageNum}`);
+        }
+
+        const extension = imageType.split('/')[1];
+
+        results.push({
+          name: `page-${pageNum}.${extension}`,
+          blob,
+          size: blob.size,
+        });
+      } catch (pageErr) {
+        console.error(`Error processing page ${pageNum}:`, pageErr);
+        continue;
+      }
 
       self.postMessage({
         type: "progress",
         value: Math.round((pageNum / totalPages) * 100),
       });
 
-      page.cleanup();
+    }
+
+    if (results.length === 0) {
+      throw new Error('No pages could be converted to images.');
     }
 
     self.postMessage({
