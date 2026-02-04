@@ -1,11 +1,8 @@
 import { useAppContext } from "../context/AppContext";
-import ResultsList from "../components/ResultsList";
-// import Loading from "../components/Loading";
-// import useConversion from "../hooks/useConversion";
-import MarkdownInput from "../components/MarkdownInput";
+import MarkdownInput from "../components/Markdowninput";
 import { useNavigate } from "react-router-dom";
 export default function MdToPdf() {
-  const { status, convert } = useAppContext();
+  const { convert } = useAppContext();
   const navigate = useNavigate();
   function handleClick() {
     navigate("/");

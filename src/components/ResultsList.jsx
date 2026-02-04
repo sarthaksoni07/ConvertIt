@@ -4,7 +4,6 @@ export default function ResultsList() {
   const { results } = useAppContext();
 
   if (results.length === 0) return null;
-
   function downloadFile(blob, name) {
     const url = URL.createObjectURL(blob);
 
@@ -26,7 +25,6 @@ export default function ResultsList() {
     <>
       <h3>Processed Files</h3>
       <p>Results count: {results.length}</p>
-
       <ul>
         {results.map((res) => (
           <li key={res.name}>

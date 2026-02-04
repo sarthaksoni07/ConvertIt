@@ -1,12 +1,11 @@
 import useCompression from "../hooks/useCompression";
 import FileUploader from "../components/FileUploader";
 import { useAppContext } from "../context/AppContext";
-import ResultsList from "../components/ResultsList";
 import Loading from "../components/Loading";
 import { useNavigate} from "react-router-dom";
 export default function Compress() {
     const { startCompression } = useCompression();
-      const { files, status,setStatus,setProgress, progress, convert } = useAppContext();
+      const { files, status, progress, convert } = useAppContext();
 
       const navigate = useNavigate();
       function handleClick(){
@@ -15,7 +14,7 @@ export default function Compress() {
   return (
     <>
      
-      <FileUploader />
+      <FileUploader accept=".jpg,.jpeg,.png,.gif,.webp,.pdf" />
       <p>Status:{status}</p>
       <p>Files Selected:{files.length}</p>
       {status === "ready" && (

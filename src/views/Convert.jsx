@@ -1,11 +1,10 @@
 import FileUploader from "../components/FileUploader";
 import useConversion from "../hooks/useConversion";
-import ResultsList from "../components/ResultsList";
 import { useAppContext } from "../context/AppContext";
 import Loading from "../components/Loading";
 import { useNavigate } from "react-router-dom";
 export default function Convert() {
-  const { files, status,setStatus, progress, convert } = useAppContext();
+  const { files, status, progress, convert } = useAppContext();
   const { startConversion } = useConversion();
   const navigate = useNavigate();
   function handleClick() {
@@ -13,7 +12,7 @@ export default function Convert() {
   }
   return (
     <>
-      <FileUploader />
+      <FileUploader accept=".pdf,.jpg,.jpeg,.png,.gif,.webp" />
       <p>Status:{status}</p>
       <p>Files Selected:{files.length}</p>
       {status === "ready" && <button onClick={startConversion}>Convert</button>}
