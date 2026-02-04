@@ -21,7 +21,6 @@ export default function MarkdownInput() {
     }
   }
 
-  // Handle drag-drop anywhere on the page
   useEffect(() => {
     function onDragOver(e) {
       e.preventDefault();
@@ -59,7 +58,7 @@ export default function MarkdownInput() {
 
   return (
     <div>
-      <h2>Markdown to PDF</h2>
+      <h2>ChatGpt/AI to PDF converter</h2>
       
       <div className="file-controls">
         <input
@@ -80,7 +79,7 @@ export default function MarkdownInput() {
       <textarea
         value={markdown}
         onChange={(e) => setMarkdown(e.target.value)}
-        placeholder="Enter your markdown here..."
+        placeholder="Paste Text from ChatGPT, Gemini etc..."
         rows={10}
         cols={50}
       />

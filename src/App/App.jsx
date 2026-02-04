@@ -1,7 +1,7 @@
 import { Routes, Route, Link} from "react-router-dom";
 import  Home  from "../views/Home";
 import Convert from "../views/Convert";
-import MdToPdf from "../views/MdToPdf";
+import AiToPdf from "../views/AiToPdf";
 import Compress from "../views/Compress";
 import Header from "../views/Head";
 export default function App() {
@@ -11,7 +11,7 @@ export default function App() {
         <Route path="/" element={<Home />} />
         <Route path="/convert" element={<Convert />} />
         <Route path="/compress" element={<Compress />} />
-        <Route path="/mdtopdf" element={<MdToPdf />} />
+        <Route path="/mdtopdf" element={<AiToPdf />} />
         </Route>
         <Route
           path="*"

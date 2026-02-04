@@ -9,7 +9,6 @@ export default function Convert() {
   const { startConversion } = useConversion();
   const navigate = useNavigate();
   
-  // Reset status and convert when leaving this page
   useEffect(() => {
     return () => {
       setStatus("idle");

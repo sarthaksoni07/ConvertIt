@@ -10,7 +10,6 @@ export default function Compress() {
 
       const navigate = useNavigate();
       
-      // Reset status when leaving this page
       useEffect(() => {
         return () => {
           setStatus("idle");
