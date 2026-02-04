@@ -3,10 +3,20 @@ import useConversion from "../hooks/useConversion";
 import { useAppContext } from "../context/AppContext";
 import Loading from "../components/Loading";
 import { useNavigate } from "react-router-dom";
+import { useEffect } from "react";
 export default function Convert() {
-  const { files, status, progress, convert } = useAppContext();
+  const { files, status, progress, convert, setStatus, setConvert } = useAppContext();
   const { startConversion } = useConversion();
   const navigate = useNavigate();
+  
+  // Reset status and convert when leaving this page
+  useEffect(() => {
+    return () => {
+      setStatus("idle");
+      setConvert("idle");
+    };
+  }, [setStatus, setConvert]);
+  
   function handleClick() {
     navigate("/");
   }
