@@ -13,6 +13,7 @@ export default function Convert() {
   return (
     <>
       <FileUploader accept=".pdf,.jpg,.jpeg,.png,.gif,.webp" />
+      <p>Pro Tip : Select Multiple Images to Convert them into a Single Pdf ! </p>
       <p>Status:{status}</p>
       <p>Files Selected:{files.length}</p>
       {status === "ready" && <button onClick={startConversion}>Convert</button>}
