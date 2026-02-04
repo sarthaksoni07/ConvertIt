@@ -34,8 +34,8 @@ export default function Convert() {
         </>
       )}
 
-      {status === "done" && <p>Conversion complete ✅</p>}
-      {status === "failed" && <p>Conversion Failed ❌</p>}
+      {convert === "done" && <p>Conversion complete ✅</p>}
+      {convert === "failed" && <p>Conversion Failed ❌</p>}
       <button onClick={handleClick}>Main Menu</button>
     </>
   );
