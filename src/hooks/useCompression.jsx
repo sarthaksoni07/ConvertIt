@@ -1,12 +1,11 @@
 import { useAppContext } from "../context/AppContext";
 
 export default function useCompression() {
-  const { files, setStatus, setProgress, setResults } = useAppContext();
+  const { files, setStatus, setProgress, setResults, compressionLevel } = useAppContext();
 
   async function startCompression() {
     if (files.length === 0) return;
 
-    // Validate all files first
     let hasImages = false;
     let hasPdfs = false;
     for (let i = 0; i < files.length; i++) {
@@ -24,7 +23,6 @@ export default function useCompression() {
       }
     }
 
-    // Dynamically import the required services
     let compressImage = null;
     let compressPdf = null;
 
@@ -45,9 +43,9 @@ export default function useCompression() {
       let result;
       try {
         if (file.type.startsWith("image/")) {
-          result = await compressImage(file);
+          result = await compressImage(file, compressionLevel);
         } else if (file.type === "application/pdf") {
-          result = await compressPdf(file);
+          result = await compressPdf(file, compressionLevel);
         }
 
         if (result && result.blob) {

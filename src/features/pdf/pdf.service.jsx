@@ -1,9 +1,9 @@
-export function compressPdf(file) {
+export function compressPdf(file, compressionLevel = 60) {
   return new Promise((resolve, reject) => {
     const worker = new Worker(new URL("./pdf.worker.jsx", import.meta.url), {
       type: "module",
     });
-    worker.postMessage({ file });
+    worker.postMessage({ file, compressionLevel });
     worker.onmessage = (e) => {
       resolve(e.data);
       worker.terminate();

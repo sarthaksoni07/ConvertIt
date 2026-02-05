@@ -14,7 +14,6 @@ export default function FileUploader({ accept }) {
     }
   }
 
-  // Handle drag-drop anywhere on the page
   useEffect(() => {
     function onDragOver(e) {
       e.preventDefault();

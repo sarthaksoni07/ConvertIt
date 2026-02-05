@@ -30,7 +30,6 @@ export function convertImgToPdf(files, onProgress) {
       worker.terminate();
     };
 
-    // Handle both single file and multiple files
     const fileArray = Array.isArray(files) ? files : [files];
     worker.postMessage({ files: fileArray });
   });

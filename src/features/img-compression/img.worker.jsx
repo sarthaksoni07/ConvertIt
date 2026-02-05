@@ -1,11 +1,16 @@
 import imageCompression from "browser-image-compression";
 self.onmessage = async (e) => {
   try {
-    const { file } = e.data;
+    const { file, compressionLevel } = e.data;
+    const quality = compressionLevel;
+    const maxSizeMB = quality;
+    const maxWidthOrHeight = quality * 860;
+    
     const options = {
-      maxSizeMB: 1, // target size
-      maxWidthOrHeight: 1920,
-      useWebWorker: false, // already inside worker
+      maxSizeMB,
+      maxWidthOrHeight,
+      initialQuality: quality,
+      useWebWorker: false, 
     };
     const compressedBlob = await imageCompression(file, options);
     self.postMessage({

@@ -3,14 +3,11 @@ import { PDFDocument } from "pdf-lib";
 self.onmessage = async (e) => {
   try {
     const { files } = e.data;
-
-    // Create a new PDF
     const pdfDoc = await PDFDocument.create();
 
     let totalOriginalSize = 0;
     let firstFileName = "";
 
-    // Process all images
     for (let i = 0; i < files.length; i++) {
       const file = files[i];
       totalOriginalSize += file.size;
@@ -19,7 +16,6 @@ self.onmessage = async (e) => {
         firstFileName = file.name;
       }
 
-    //  Read image as ArrayBuffer (memory-safe)
     const imageBytes = await file.arrayBuffer();
 
     let image;
@@ -31,7 +27,6 @@ self.onmessage = async (e) => {
       throw new Error(`Unsupported image type: ${file.type}`);
     }
 
-    //  Create page sized exactly to image
     const page = pdfDoc.addPage([image.width, image.height]);
 
       page.drawImage(image, {
@@ -41,24 +36,17 @@ self.onmessage = async (e) => {
         height: image.height,
       });
 
-      // Send progress
       self.postMessage({
         type: "progress",
         value: Math.round(((i + 1) / files.length) * 100),
       });
     }
-
-    //  Save PDF
     const pdfBytes = await pdfDoc.save();
     const blob = new Blob([pdfBytes], { type: "application/pdf" });
-
-    // Generate output name
     const baseName = files.length > 1 
       ? "combined" 
       : firstFileName.replace(/\.[^/.]+$/, "");
     const outputName = baseName + ".pdf";
-
-    //  Send result (STRICT CONTRACT)
     self.postMessage({
       type: "done",
       result: {

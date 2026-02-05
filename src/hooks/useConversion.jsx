@@ -23,7 +23,6 @@ export default function useConversion() {
       }
     }
 
-    // Dynamically import the required services
     let convertImgToPdf = null;
     let convertPdfToImg = null;
 
@@ -39,12 +38,10 @@ export default function useConversion() {
     setConvert("converting");
     setProgress(0);
 
-    // Separate images and PDFs
     const imageFiles = files.filter(f => f.type.startsWith("image/"));
     const pdfFiles = files.filter(f => f.type === "application/pdf");
 
     try {
-      // Convert all images to a single PDF if any images exist
       if (imageFiles.length > 0) {
         const result = await convertImgToPdf(imageFiles, (progress) => {
           setProgress(progress);
@@ -54,7 +51,6 @@ export default function useConversion() {
         }
       }
 
-      // Convert PDFs to images
       for (let i = 0; i < pdfFiles.length; i++) {
         const file = pdfFiles[i];
         const result = await convertPdfToImg(file);

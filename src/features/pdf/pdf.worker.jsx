@@ -3,12 +3,12 @@ import imageCompression from "browser-image-compression";
 
 self.onmessage = async (e) => {
   try {
-    const { file } = e.data;
+    const { file, compressionLevel } = e.data;
+    
+    const quality = compressionLevel ;
 
     const arrayBuffer = await file.arrayBuffer();
     const pdfDoc = await PDFDocument.load(arrayBuffer);
-
-    // Remove metadata to reduce size
     pdfDoc.setTitle("");
     pdfDoc.setAuthor("");
     pdfDoc.setSubject("");
@@ -18,7 +18,6 @@ self.onmessage = async (e) => {
 
     const pages = pdfDoc.getPages();
 
-    // Compress images in PDF
     for (const page of pages) {
       const resources = page.node.Resources();
       if (!resources) continue;
@@ -38,13 +37,15 @@ self.onmessage = async (e) => {
           const imageBytes = obj.contents;
           const imageBlob = new Blob([imageBytes], { type: "image/jpeg" });
 
-          // Aggressive compression for PDFs
+          const maxSizeMB = quality;
+          const maxWidthOrHeight = quality * 500;
+          
           const compressedImage = await imageCompression(imageBlob, {
-            maxSizeMB: 0.2,        // More aggressive
-            maxWidthOrHeight: 1200, // Lower resolution
+            maxSizeMB,
+            maxWidthOrHeight,
             useWebWorker: false,
             fileType: "image/jpeg",
-            initialQuality: 0.6    // Lower quality
+            initialQuality: (0.5 +(quality/10))
           });
 
           const compressedBytes = new Uint8Array(
@@ -54,7 +55,6 @@ self.onmessage = async (e) => {
           obj.contents = compressedBytes;
           obj.dict.set(PDFName.of("Length"), compressedBytes.length);
           
-          // Add JPEG quality hint
           obj.dict.set(PDFName.of("Filter"), PDFName.of("DCTDecode"));
         } catch (imgErr) {
           console.warn("Image compression failed:", imgErr);
@@ -62,7 +62,6 @@ self.onmessage = async (e) => {
       }
     }
 
-    // Save with maximum compression
     const newPdfBytes = await pdfDoc.save({
       useObjectStreams: true,
       addDefaultPage: false,

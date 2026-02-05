@@ -6,7 +6,7 @@ import { useNavigate } from "react-router-dom";
 import { useEffect } from "react";
 export default function Compress() {
     const { startCompression } = useCompression();
-      const { files, status, progress, convert, setStatus } = useAppContext();
+      const { files, status, progress, convert, setStatus, compressionLevel, setCompressionLevel } = useAppContext();
 
       const navigate = useNavigate();
       
@@ -25,8 +25,27 @@ export default function Compress() {
       <FileUploader accept=".jpg,.jpeg,.png,.gif,.webp,.pdf" />
       <p>Status:{status}</p>
       <p>Files Selected:{files.length}</p>
+      
       {status === "ready" && (
-        <button onClick={startCompression}>Compress</button>
+        <>
+          <div style={{ margin: "20px 20px", padding: "10px 10px" }}>
+            <label htmlFor="compressionSlider" style={{ display: "block", marginBottom: "10px" }}>
+              Compression Limit : {compressionLevel}MB
+            </label>
+            <input
+              id="compressionSlider"
+              type="range"
+              max="5"
+              min="1"
+              step="1"
+              value={compressionLevel}
+              onChange={(e) => setCompressionLevel(Number(e.target.value))}
+              style={{ width: "100%", maxWidth: "400px" }}
+            />
+
+          </div>
+          <button onClick={startCompression}>Compress</button>
+        </>
       )}
       {(status === "compressing" || convert === "converting") && (
         <>

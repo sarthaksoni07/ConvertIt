@@ -16,8 +16,6 @@ export default function ResultsList() {
     a.click();
 
     document.body.removeChild(a);
-
-    // delay revoke slightly to avoid race condition
     setTimeout(() => URL.revokeObjectURL(url), 100);
   }
 

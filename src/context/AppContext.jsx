@@ -13,6 +13,8 @@ export function AppProvider({ children }) {
 
   const [convert, setConvert] = useState("idle");
 
+  const [compressionLevel, setCompressionLevel] = useState(1); 
+
   const [announcement, setAnnouncement] = useState({
     message: "More features coming soon 🚀",
     message1:"Pdf Compression is a Beta feature, Compression Ratio May not be Significant.",
@@ -35,6 +37,8 @@ export function AppProvider({ children }) {
         setResults,
         convert,
         setConvert,
+        compressionLevel,
+        setCompressionLevel,
       }}
     >
       {children}
