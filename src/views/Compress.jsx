@@ -30,7 +30,7 @@ export default function Compress() {
         <>
           <div style={{ margin: "20px 20px", padding: "10px 10px" }}>
             <label htmlFor="compressionSlider" style={{ display: "block", marginBottom: "10px" }}>
-              Compression Limit : {compressionLevel}MB
+              Compression Level : {compressionLevel}MB
             </label>
             <input
               id="compressionSlider"
@@ -38,8 +38,8 @@ export default function Compress() {
               max="5"
               min="1"
               step="1"
-              value={compressionLevel}
-              onChange={(e) => setCompressionLevel(Number(e.target.value))}
+              value={6-compressionLevel}
+              onChange={(e) => setCompressionLevel(6-Number(e.target.value))}
               style={{ width: "100%", maxWidth: "400px" }}
             />
 
