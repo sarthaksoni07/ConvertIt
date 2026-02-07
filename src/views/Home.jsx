@@ -12,6 +12,27 @@ export default function Home() {
     navigate("/mdtopdf");
   }
 
+    useEffect(() => {
+      function onDragOver(e) {
+        e.preventDefault();
+        e.stopPropagation();
+      }
+  
+      function onDrop(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        handleFiles(e.dataTransfer.files);
+      }
+  
+      document.addEventListener("dragover", onDragOver);
+      document.addEventListener("drop", onDrop);
+  
+      return () => {
+        document.removeEventListener("dragover", onDragOver);
+        document.removeEventListener("drop", onDrop);
+      };
+    }, []);
+    
   return (
     <>
       <p>
