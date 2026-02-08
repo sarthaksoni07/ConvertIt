@@ -49,8 +49,8 @@ export default function FileUploader({ accept }) {
       <button onClick={() => document.getElementById('file-input').click()}>
         📁 Browse Files
       </button>
-      <p style={{ fontSize: "0.9em", color: "#666" }}>
-        💡 Or drag & drop files anywhere on the page
+      <p>
+        💡 Or drag & drop files anywhere on this page
       </p>
     </div>
   );

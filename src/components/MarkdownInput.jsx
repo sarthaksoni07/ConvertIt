@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useAppContext } from "../context/AppContext";
 import { convertMdToPdf } from "../features/mdToPdf/mdToPdf.service";
+import Loading from "./Loading";
 
 export default function MarkdownInput() {
   const [markdown, setMarkdown] = useState("");
@@ -49,18 +50,18 @@ export default function MarkdownInput() {
       const result = await convertMdToPdf(markdown, fileName);
       setResults((prev) => [...prev, result]);
       setStatus("done");
+      setMarkdown("");
+      setFileName("");
     } catch (error) {
       console.error("Conversion failed:", error);
-      alert("Failed to convert markdown to PDF");
+      alert("Failed to convert to PDF");
       setStatus("failed");
     }
   };
 
   return (
-    <div>
-      <h2>ChatGpt/AI to PDF converter</h2>
-      
-      <div className="file-controls">
+    <div style={{ maxWidth: '800px', margin: '0 auto' }}>
+      <div className="file-controls" style={{ marginBottom: '2rem' }}>
         <input
           type="file"
           accept=".md,.markdown,.txt"
@@ -69,25 +70,64 @@ export default function MarkdownInput() {
           id="md-file-input"
         />
         <button onClick={() => document.getElementById('md-file-input').click()}>
-          📁 Browse Files
+          📁 Import File
         </button>
-        <p style={{ fontSize: "0.9em", color: "#666" }}>
-          💡 Or drag & drop .md files anywhere on the page
+        <p>
+          💡 Or drag & drop .md/.txt files anywhere on this page
         </p>
       </div>
 
-      <textarea
-        value={markdown}
-        onChange={(e) => setMarkdown(e.target.value)}
-        placeholder="Paste Text from ChatGPT, Gemini etc..."
-        rows={10}
-        cols={50}
-      />
-      <p>File: {fileName || "No file selected"}</p>
-      <br />
-      <button onClick={handleConvert} disabled={status === "converting" || !markdown.trim()}>
-        {status === "converting" ? "Converting..." : "Convert to PDF"}
-      </button>
+      <div style={{ marginBottom: '1.5rem' }}>
+        <label htmlFor="markdown-textarea">
+          Paste your text below:
+        </label>
+        <textarea
+          id="markdown-textarea"
+          value={markdown}
+          onChange={(e) => setMarkdown(e.target.value)}
+          placeholder="Paste text from ChatGPT, Gemini, or any other source...
+
+Supports Markdown formatting:
+# Headings
+**Bold text**
+*Italic text*
+- Lists
+
+And much more!"
+          rows={15}
+          style={{ width: '100%' }}
+        />
+      </div>
+
+      {fileName && (
+        <p style={{ color: 'var(--text-light)', marginBottom: '1rem' }}>
+          📄 File loaded: <strong>{fileName}</strong>
+        </p>
+      )}
+
+      {status === "converting" && <Loading />}
+      
+      {status === "done" && (
+        <div className="text-center">
+          <p className="status-message status-complete">✅ PDF Created Successfully!</p>
+        </div>
+      )}
+      
+      {status === "failed" && (
+        <div className="text-center">
+          <p className="status-message status-error">❌ Conversion Failed</p>
+        </div>
+      )}
+
+      <div className="text-center" style={{ marginTop: '1.5rem' }}>
+        <button 
+          onClick={handleConvert} 
+          disabled={status === "converting" || !markdown.trim()}
+          style={{ fontSize: '1.1rem', padding: '1rem 2.5rem' }}
+        >
+          {status === "converting" ? "Converting..." : "Convert to PDF"}
+        </button>
+      </div>
     </div>
   );
 }

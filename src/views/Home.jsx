@@ -1,49 +1,40 @@
 import { useNavigate } from "react-router-dom";
+import Header from "./Head";
+import ResultsList from "../components/ResultsList";
 
 export default function Home() {
   const navigate = useNavigate();
-  function handleCompress() {
-    navigate("/compress");
-  }
-  function handleConvert() {
-    navigate("/convert");
-  }
-  function handleMdToPdf() {
-    navigate("/mdtopdf");
-  }
 
-    useEffect(() => {
-      function onDragOver(e) {
-        e.preventDefault();
-        e.stopPropagation();
-      }
-  
-      function onDrop(e) {
-        e.preventDefault();
-        e.stopPropagation();
-        handleFiles(e.dataTransfer.files);
-      }
-  
-      document.addEventListener("dragover", onDragOver);
-      document.addEventListener("drop", onDrop);
-  
-      return () => {
-        document.removeEventListener("dragover", onDragOver);
-        document.removeEventListener("drop", onDrop);
-      };
-    }, []);
-    
   return (
     <>
-      <p>
-        <button onClick={handleConvert}>Convert</button>
-      </p>
-      <p>
-        <button onClick={handleCompress}>Compress</button>
-      </p>
-      <p>
-        <button onClick={handleMdToPdf}>ChatGPT / AI Text → PDF</button>
-      </p>
+      <div className="page-container">
+        <div className="home-container">
+          <button
+            className="home-card"
+            onClick={() => navigate("/convert")}
+            aria-label="Convert files"
+          >
+            <h2 className="home-card-title">📄 Convert</h2>
+          </button>
+
+          <button
+            className="home-card"
+            onClick={() => navigate("/compress")}
+            aria-label="Compress files"
+          >
+            <h2 className="home-card-title">🗜️ Compress</h2>
+          </button>
+
+          <button
+            className="home-card"
+            onClick={() => navigate("/mdtopdf")}
+            aria-label="Convert AI text to PDF"
+          >
+            <h2 className="home-card-title"> AI Text → PDF</h2>
+          </button>
+        </div>
+      </div>
+      <ResultsList />
     </>
   );
 }

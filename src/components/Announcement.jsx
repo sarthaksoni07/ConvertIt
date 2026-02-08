@@ -2,12 +2,22 @@ import { useAppContext } from "../context/AppContext";
 
 export default function Announcement() {
   const { announcement } = useAppContext();
-  if (!announcement.enabled) return null;
+  
   return (
-    <div style={{ padding: "10px", background: "#eee", marginBottom: "5px" }}>
-      <p>{announcement.message}</p>
-      <p>{announcement.message1}</p>
-      <p>{announcement.message2}</p>
+    <div className="announcement-container">
+      <h3 className="announcement-punchline">
+       Your Privacy Matters: 100% On-Device Processing
+      </h3>
+      <p>
+        No uploads, no servers, no tracking. Your files never leave your device.
+      </p>
+      {announcement.enabled && (
+        <>
+          {announcement.message && <p>{announcement.message}</p>}
+          {announcement.message1 && <p>{announcement.message1}</p>}
+          {announcement.message2 && <p>{announcement.message2}</p>}
+        </>
+      )}
     </div>
   );
 }
