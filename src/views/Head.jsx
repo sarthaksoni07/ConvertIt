@@ -1,6 +1,7 @@
 import { Outlet } from "react-router-dom";
 import Announcement from "../components/Announcement";
 import { useState } from "react";
+import ResultsList from "../components/ResultsList";
 
 export default function Header() {
   const [show, setShow] = useState(false);
@@ -8,10 +9,15 @@ export default function Header() {
     <>
       <div className="header-container">
         <div className="header-content">
-          <h1>ConvertIt</h1>
-          <h3>We Love to do it On Device</h3>
+          <h1>ConvertIt.</h1>
+          <h3>100% On-Device Processing</h3>
 
-          {show && <Announcement />}
+          <div
+            className={`announcement-wrapper${show ? " is-visible" : ""}`}
+            aria-hidden={!show}
+          >
+            <Announcement />
+          </div>
           {show && (
             <button
               onClick={() => {
@@ -30,9 +36,11 @@ export default function Header() {
               Show announcement
             </button>
           )}
+          <h3>Supported Formats : Image, Pdf and Markdown(Md)</h3>
         </div>
       </div>
       <Outlet />
+      <ResultsList />
     </>
   );
 }

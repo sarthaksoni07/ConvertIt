@@ -3,7 +3,6 @@ import MarkdownInput from "../components/Markdowninput";
 import DropZone from "../components/DropZone";
 import { useNavigate } from "react-router-dom";
 import { useEffect } from "react";
-import ResultsList from "../components/ResultsList";
 
 
 export default function AiToPdf() {
@@ -38,7 +37,6 @@ export default function AiToPdf() {
         <button onClick={handleClick} className="secondary-button">
           Main Menu
         </button>
-        <ResultsList />
       </div>
     </div>
   );

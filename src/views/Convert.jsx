@@ -5,7 +5,6 @@ import Loading from "../components/Loading";
 import DropZone from "../components/DropZone";
 import { useNavigate } from "react-router-dom";
 import { useEffect } from "react";
-import ResultsList from "../components/ResultsList";
 export default function Convert() {
   const { files, setFiles, status, progress, convert, setStatus, setConvert } = useAppContext();
   const { startConversion } = useConversion();
@@ -30,7 +29,7 @@ export default function Convert() {
       <div className="text-center">
         <h2>Convert Files</h2>
         <p style={{ color: 'var(--text-light)', marginBottom: '2rem' }}>
-          Convert images to PDF or extract images from PDFs
+          Convert Images to Pdf or Pdf to Images !
         </p>
       </div>
 
@@ -83,7 +82,6 @@ export default function Convert() {
         <button onClick={handleClick} className="secondary-button">
           Main Menu
         </button>
-        <ResultsList />
       </div>
     </div>
   );

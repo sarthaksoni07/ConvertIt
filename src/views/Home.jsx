@@ -1,6 +1,5 @@
 import { useNavigate } from "react-router-dom";
-import Header from "./Head";
-import ResultsList from "../components/ResultsList";
+
 
 export default function Home() {
   const navigate = useNavigate();
@@ -34,7 +33,6 @@ export default function Home() {
           </button>
         </div>
       </div>
-      <ResultsList />
     </>
   );
 }

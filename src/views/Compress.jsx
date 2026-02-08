@@ -5,7 +5,6 @@ import Loading from "../components/Loading";
 import DropZone from "../components/DropZone";
 import { useNavigate } from "react-router-dom";
 import { useEffect } from "react";
-import ResultsList from "../components/ResultsList";
 
 export default function Compress() {
   const { startCompression } = useCompression();
@@ -111,7 +110,6 @@ export default function Compress() {
         <button onClick={handleClick} className="secondary-button">
           Main Menu
         </button>
-        <ResultsList />
       </div>
     </div>
   );

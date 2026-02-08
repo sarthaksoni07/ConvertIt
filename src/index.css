@@ -2,11 +2,14 @@
    GLOBAL STYLES & VARIABLES
    ======================================== */
 :root {
-  /* Color Palette */
-  --primary-blue: #000000;
-  --primary-blue-dark: #031629;
-  --primary-blue-light: #0f141b;
-  --accent-blue: #5AA0F0;
+  /* Color Palette - Red to Blue Gradient */
+  --primary-red: #2c1c3b;           /* Rich red */
+  --red-medium: #050000;            /* Medium red (transition) */
+  --gradient-middle: #2a2046;       /* Purple-blue transition */
+  --primary-blue: #491313;          /* Dark red base */
+  --primary-blue-dark: #8ca6dd;     /* Light blue */
+  --primary-blue-light: #0363e9;    /* Bright blue */
+  --accent-blue: #0f2e67;           
   --white: #FFFFFF;
   --off-white: #FAFBFC;
   --text-dark: #2C3E50;
@@ -93,11 +96,9 @@ p {
    ======================================== */
 .header-container {
   background: linear-gradient(135deg, var(--primary-blue) 0%, var(--accent-blue) 100%);
-  padding: 2rem 1.5rem;
+  padding: 1.5rem 1.5rem 1rem 1.5rem;
   box-shadow: var(--shadow-md);
-  position: sticky;
-  top: 0;
-  z-index: 100;
+  position: relative;
   will-change: transform;
   animation: slideDown 0.4s ease-out;
 }
@@ -136,6 +137,22 @@ p {
 /* ========================================
    ANNOUNCEMENT SECTION
    ======================================== */
+.announcement-wrapper {
+  max-height: 0;
+  opacity: 0;
+  overflow: hidden;
+  transform: translateY(-6px);
+  transition: max-height 0.35s ease, opacity 0.3s ease, transform 0.3s ease;
+  pointer-events: none;
+}
+
+.announcement-wrapper.is-visible {
+  max-height: 360px;
+  opacity: 1;
+  transform: translateY(0);
+  pointer-events: auto;
+}
+
 .announcement-container {
   background: rgba(255, 255, 255, 0.15);
   backdrop-filter: blur(10px);
@@ -219,7 +236,7 @@ p {
 }
 
 .home-card {
-  background: linear-gradient(135deg, var(--primary-blue) 0%, var(--accent-blue) 100%);
+  background: linear-gradient(135deg, var(--primary-red) 0%, var(--gradient-middle) 50%, var(--accent-blue) 100%);
   border-radius: 20px;
   padding: 2.5rem 2rem;
   box-shadow: var(--shadow-md);
@@ -278,7 +295,7 @@ button {
   font-size: 1rem;
   font-weight: 600;
   font-family: inherit;
-  background: linear-gradient(135deg, var(--primary-blue) 0%, var(--accent-blue) 100%);
+  background: linear-gradient(135deg, var(--primary-red) 0%, var(--gradient-middle) 50%, var(--accent-blue) 100%);
   color: var(--white);
   cursor: pointer;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
@@ -291,7 +308,7 @@ button {
 button:hover {
   transform: translateY(-2px);
   box-shadow: var(--shadow-md);
-  background: linear-gradient(135deg, var(--primary-blue-dark) 0%, var(--primary-blue) 100%);
+  background: linear-gradient(135deg, var(--red-medium) 0%, #7A6BA8 50%, #1e3a5f 100%);
 }
 
 button:active {

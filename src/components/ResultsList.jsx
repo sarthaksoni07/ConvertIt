@@ -4,7 +4,7 @@ export default function ResultsList() {
   const { results } = useAppContext();
 
   if (results.length === 0) return null;
-  
+
   function downloadFile(blob, name) {
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
@@ -26,28 +26,31 @@ export default function ResultsList() {
             <div className="result-info">
               <strong>📄 {res.name}</strong>
               <br />
-              <span style={{ fontSize: '0.9rem', color: 'var(--text-light)' }}>
+              <span style={{ fontSize: "0.9rem", color: "var(--text-light)" }}>
                 {res.originalSize && res.compressedSize ? (
                   <>
                     {Math.round(res.originalSize / 1024)} KB →{" "}
-                    <span style={{ color: 'var(--success)', fontWeight: '600' }}>
+                    <span
+                      style={{ color: "var(--success)", fontWeight: "600" }}
+                    >
                       {Math.round(res.compressedSize / 1024)} KB
-                    </span>
-                    {" "}(
+                    </span>{" "}
+                    (
                     <strong>
-                      {Math.round((1 - res.compressedSize / res.originalSize) * 100)}% smaller
+                      {Math.round(
+                        (1 - res.compressedSize / res.originalSize) * 100,
+                      )}
+                      % smaller
                     </strong>
                     )
                   </>
                 ) : (
-                  'Ready to download'
+                  "Ready to download"
                 )}
               </span>
             </div>
-            <button
-              onClick={() => downloadFile(res.blob, res.name)}
-            >
-              ⬇️ Download
+            <button onClick={() => downloadFile(res.blob, res.name)}>
+              Download
             </button>
           </li>
         ))}

@@ -85,15 +85,7 @@ export default function MarkdownInput() {
           id="markdown-textarea"
           value={markdown}
           onChange={(e) => setMarkdown(e.target.value)}
-          placeholder="Paste text from ChatGPT, Gemini, or any other source...
-
-Supports Markdown formatting:
-# Headings
-**Bold text**
-*Italic text*
-- Lists
-
-And much more!"
+          placeholder="Paste text from ChatGPT, Gemini, or any other source..."
           rows={15}
           style={{ width: '100%' }}
         />
