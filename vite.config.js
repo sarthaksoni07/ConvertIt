@@ -1,7 +1,7 @@
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react-swc'
 
-const ngrokDomain ='escapingly-oblongish-annalisa.ngrok-free.dev';
+const ngrokDomain = process.env.VITE_NGROK_URL || 'localhost';
 
 export default defineConfig({
  plugins: [react()],
