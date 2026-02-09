@@ -6,11 +6,12 @@ export async function convertMdToPdf(text, fileName = "markdown") {
   const filename = fileName.replace(/\.(md|markdown|txt)$/, '') || 'markdown';
   
   const options = {
-    margin: 1,
+    margin: 0.3,
     filename: `${filename}.pdf`,
-    image: { type: 'jpeg', quality: 0.98 },
-    html2canvas: { scale: 2 },
-    jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' }
+    image: { type: 'jpeg', quality: 1 },
+    html2canvas: { scale: 4 },
+    jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' },
+    pagebreak: { mode: ['avoid-all', 'css', 'legacy'], avoid: ['p', 'li', 'pre', 'blockquote', 'table', 'img'] }
   };
 
   const blob = await html2pdf().from(html).set(options).outputPdf('blob');

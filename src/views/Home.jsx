@@ -30,6 +30,13 @@ export default function Home() {
           >
             <h2 className="home-card-title"> AI Text → PDF</h2>
           </button>
+          <button
+            className="home-card"
+            onClick={() => navigate("/")}
+            aria-label="Merge Pdf"
+          >
+            <h2 className="home-card-title">Coming Soon</h2>
+          </button>
         </div>
       </div>
     </>
