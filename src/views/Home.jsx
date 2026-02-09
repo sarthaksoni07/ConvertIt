@@ -1,6 +1,5 @@
 import { useNavigate } from "react-router-dom";
 
-
 export default function Home() {
   const navigate = useNavigate();
 
@@ -13,7 +12,7 @@ export default function Home() {
             onClick={() => navigate("/convert")}
             aria-label="Convert files"
           >
-            <h2 className="home-card-title">📄 Convert</h2>
+            <h2 className="home-card-title">Convert</h2>
           </button>
 
           <button
@@ -21,7 +20,7 @@ export default function Home() {
             onClick={() => navigate("/compress")}
             aria-label="Compress files"
           >
-            <h2 className="home-card-title">🗜️ Compress</h2>
+            <h2 className="home-card-title">Compress</h2>
           </button>
 
           <button

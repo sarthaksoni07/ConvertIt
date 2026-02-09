@@ -52,7 +52,7 @@ export default function Convert() {
       {status === "ready" && (
         <div className="text-center mt-3">
           <button onClick={startConversion} style={{ fontSize: '1.1rem', padding: '1rem 2.5rem' }}>
-            🚀 Start Conversion
+            Start Conversion
           </button>
         </div>
       )}
