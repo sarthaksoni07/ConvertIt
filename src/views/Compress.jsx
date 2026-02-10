@@ -52,7 +52,10 @@ export default function Compress() {
             marginBottom: '1.5rem'
           }}>
             <label htmlFor="compressionSlider">
-              Compression Target: <strong>{compressionLevel}MB</strong>
+              Compression Level: <strong>{compressionLevel}</strong>{" "}
+              <span style={{ fontSize: '0.85rem', color: 'var(--text-light)' }}>
+                ({compressionLevel <= 2 ? "Smaller file" : compressionLevel >= 4 ? "Better quality" : "Balanced"})
+              </span>
             </label>
             <input
               id="compressionSlider"

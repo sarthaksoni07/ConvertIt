@@ -37,7 +37,15 @@ self.onmessage = async (e) => {
     const { file, scale = 2, imageType = "image/png" } = e.data;
 
     const pdfData = await file.arrayBuffer();
-    const pdf = await pdfjsLib.getDocument({ data: pdfData }).promise;
+    const cMapUrl = `https://cdn.jsdelivr.net/npm/pdfjs-dist@${pdfjsLib.version}/cmaps/`;
+    const standardFontDataUrl = `https://cdn.jsdelivr.net/npm/pdfjs-dist@${pdfjsLib.version}/standard_fonts/`;
+    const pdf = await pdfjsLib.getDocument({
+      data: pdfData,
+      cMapUrl,
+      cMapPacked: true,
+      standardFontDataUrl,
+      disableFontFace: true,
+    }).promise;
 
     if (pdf.isEncrypted) {
       throw new Error('Encrypted PDFs are not supported.');

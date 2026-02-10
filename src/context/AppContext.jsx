@@ -17,7 +17,7 @@ export function AppProvider({ children }) {
 
   const [announcement, setAnnouncement] = useState({
     message: "More features coming soon 🚀",
-    message1:"Pdf Compression is a Beta feature, Compression Ratio May not be Significant.",
+    message1:"",
     enabled: true,
   });
 
