@@ -33,7 +33,7 @@ export default function Convert() {
         </p>
       </div>
 
-      <FileUploader accept=".pdf,.jpg,.jpeg,.png,.gif,.webp" />
+      <FileUploader accept=".pdf" />
       
       <div className="status-container">
         {files.length > 0 && (
