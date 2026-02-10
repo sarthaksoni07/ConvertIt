@@ -64,7 +64,8 @@ export default function Compress() {
               onChange={(e) => setCompressionLevel(Number(e.target.value))}
               style={{ 
                 width: '100%',
-                marginTop: '1rem'
+                marginTop: '1rem',
+                '--value': `${((compressionLevel - 1) / 4) * 100}%`
               }}
             />
             <p style={{ 
