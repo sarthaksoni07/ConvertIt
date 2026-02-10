@@ -43,15 +43,7 @@ self.onmessage = async (e) => {
     const { scale, quality } = getCompressionSettings(compressionLevel);
 
     const arrayBuffer = await file.arrayBuffer();
-    const cMapUrl = `https://cdn.jsdelivr.net/npm/pdfjs-dist@${pdfjsLib.version}/cmaps/`;
-    const standardFontDataUrl = `https://cdn.jsdelivr.net/npm/pdfjs-dist@${pdfjsLib.version}/standard_fonts/`;
-    const pdf = await pdfjsLib.getDocument({
-      data: arrayBuffer,
-      cMapUrl,
-      cMapPacked: true,
-      standardFontDataUrl,
-      disableFontFace: true,
-    }).promise;
+    const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
     const newPdf = await PDFDocument.create();
     const totalPages = pdf.numPages;
 

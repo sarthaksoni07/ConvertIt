@@ -17,7 +17,6 @@ export function AppProvider({ children }) {
 
   const [announcement, setAnnouncement] = useState({
     message: "More features coming soon 🚀",
-    message1:"",
     enabled: true,
   });
 
