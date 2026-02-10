@@ -6,7 +6,7 @@ export default function Announcement() {
   return (
     <div className="announcement-container">
       <h3 className="announcement-punchline">
-        Your Privacy Matters: 100% On-Device Processing
+        Your Privacy Matters
       </h3>
       {announcement.enabled && (
         <>
