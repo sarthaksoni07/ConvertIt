@@ -1,5 +1,5 @@
 import FileUploader from "../components/FileUploader";
-import useConversion from "../hooks/useConversion";
+import useMerge from "../hooks/useMerge";
 import { useAppContext } from "../context/AppContext";
 import Loading from "../components/Loading";
 import DropZone from "../components/DropZone";
@@ -7,7 +7,7 @@ import { useNavigate } from "react-router-dom";
 import { useEffect } from "react";
 export default function Convert() {
   const { files, setFiles, status, progress, convert, setStatus, setConvert } = useAppContext();
-  const { startConversion } = useConversion();
+  const { startMerge } = useMerge();
   const navigate = useNavigate();
   
   useEffect(() => {
@@ -27,9 +27,9 @@ export default function Convert() {
       <DropZone />
       
       <div className="text-center">
-        <h2>Convert Files</h2>
+        <h2>Merge Pdfs</h2>
         <p style={{ color: 'var(--text-light)', marginBottom: '2rem' }}>
-          Convert Images to Pdf or Pdf to Images !
+          Merge Multiple Pdfs Into One !
         </p>
       </div>
 
@@ -42,17 +42,13 @@ export default function Convert() {
           </p>
         )}
         
-        {files.length > 1 && (
-          <p style={{ color: 'var(--white)', fontWeight: '500', marginTop: '1rem' }}>
-            💡 Pro Tip: Multiple images will be combined into a single PDF!
-          </p>
-        )}
+
       </div>
 
       {status === "ready" && (
         <div className="text-center mt-3">
-          <button onClick={startConversion} style={{ fontSize: '1.1rem', padding: '1rem 2.5rem' }}>
-            Start Conversion
+          <button onClick={startMerge} style={{ fontSize: '1.1rem', padding: '1rem 2.5rem' }}>
+            Start Merge
           </button>
         </div>
       )}
@@ -68,13 +64,13 @@ export default function Convert() {
 
       {convert === "done" && (
         <div className="text-center">
-          <p className="status-message status-complete">✅ Conversion Complete!</p>
+          <p className="status-message status-complete">Merge Complete!</p>
         </div>
       )}
       
       {convert === "failed" && (
         <div className="text-center">
-          <p className="status-message status-error">❌ Conversion Failed</p>
+          <p className="status-message status-error">Merge Failed !</p>
         </div>
       )}
       

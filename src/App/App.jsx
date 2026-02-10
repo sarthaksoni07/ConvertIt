@@ -6,6 +6,7 @@ import Convert from "../views/Convert";
 import AiToPdf from "../views/AiToPdf";
 import Compress from "../views/Compress";
 import Header from "../views/Head";
+import Merge from "../views/Merge"
 export default function App() {
   return (
     <>
@@ -15,6 +16,7 @@ export default function App() {
           <Route path="/convert" element={<Convert />} />
           <Route path="/compress" element={<Compress />} />
           <Route path="/mdtopdf" element={<AiToPdf />} />
+          <Route path="/mergepdf" element={<Merge />} />
         </Route>
 
         <Route

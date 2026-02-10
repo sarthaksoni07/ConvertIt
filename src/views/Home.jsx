@@ -32,10 +32,10 @@ export default function Home() {
           </button>
           <button
             className="home-card"
-            onClick={() => navigate("/")}
+            onClick={() => navigate("/mergepdf")}
             aria-label="Merge Pdf"
           >
-            <h2 className="home-card-title">Coming Soon</h2>
+            <h2 className="home-card-title">Merge Pdfs</h2>
           </button>
         </div>
       </div>
