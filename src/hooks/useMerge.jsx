@@ -46,6 +46,9 @@ export default function useMerge() {
         return;
       }
     }
+    else if(pdfFiles.length<=1){
+        setConvert("failed");
+    }
   }
   return { startMerge };
 }
