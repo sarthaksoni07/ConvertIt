@@ -35,14 +35,6 @@ export default function ResultsList() {
                     >
                       {Math.round(res.compressedSize / 1024)} KB
                     </span>{" "}
-                    (
-                    <strong>
-                      {Math.round(
-                        (1 - res.compressedSize / res.originalSize) * 100,
-                      )}
-                      % smaller
-                    </strong>
-                    )
                   </>
                 ) : (
                   "Ready to download"
