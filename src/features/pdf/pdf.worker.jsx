@@ -1,102 +1,112 @@
-import * as pdfjsLib from "pdfjs-dist/build/pdf.mjs";
-import pdfWorker from "pdfjs-dist/build/pdf.worker.mjs?url";
-import { PDFDocument } from "pdf-lib";
-
-pdfjsLib.GlobalWorkerOptions.workerSrc = pdfWorker;
-
-self.document = {
-  createElement: (tagName) => {
-    if (tagName === "canvas") {
-      return new OffscreenCanvas(1, 1);
-    }
-    throw new Error(`Unsupported element: ${tagName}`);
-  },
-};
-
-class OffscreenCanvasFactory {
-  create(width, height) {
-    return new OffscreenCanvas(width, height);
-  }
-  reset(canvas, width, height) {
-    canvas.width = width;
-    canvas.height = height;
-  }
-  destroy() {}
-}
-
-const canvasFactory = new OffscreenCanvasFactory();
+import { PDFDocument, PDFName, PDFRawStream } from "pdf-lib";
 
 function getCompressionSettings(level) {
   const settings = {
-    1: { scale: 1.5, quality: 0.5 },
-    2: { scale: 1.65, quality: 0.6 },
-    3: { scale: 1.85, quality: 0.7 },
-    4: { scale: 1.95, quality: 0.8 },
-    5: { scale: 2.0, quality: 1 },
+    1: { quality: 0.3, scaleFactor: 0.5 },
+    2: { quality: 0.45, scaleFactor: 0.65 },
+    3: { quality: 0.6, scaleFactor: 0.8 },
+    4: { quality: 0.75, scaleFactor: 0.9 },
+    5: { quality: 0.9, scaleFactor: 1.0 },
   };
   return settings[level] || settings[3];
+}
+
+async function recompressJpegImage(ref, imageStream, quality, scaleFactor, context) {
+  const width = imageStream.dict.get(PDFName.of("Width"));
+  const height = imageStream.dict.get(PDFName.of("Height"));
+  if (!width || !height) return false;
+
+  const w = typeof width.numberValue === "function" ? width.numberValue() : width.value();
+  const h = typeof height.numberValue === "function" ? height.numberValue() : height.value();
+  if (!w || !h || w <= 0 || h <= 0) return false;
+
+  try {
+    const jpegData = imageStream.contents || imageStream.getContents();
+    const blob = new Blob([jpegData], { type: "image/jpeg" });
+    const bitmap = await createImageBitmap(blob);
+
+    const newW = Math.max(1, Math.round(bitmap.width * scaleFactor));
+    const newH = Math.max(1, Math.round(bitmap.height * scaleFactor));
+
+    const canvas = new OffscreenCanvas(newW, newH);
+    const ctx = canvas.getContext("2d");
+    ctx.drawImage(bitmap, 0, 0, newW, newH);
+    bitmap.close();
+
+    const newBlob = await canvas.convertToBlob({
+      type: "image/jpeg",
+      quality,
+    });
+
+    const newBytes = new Uint8Array(await newBlob.arrayBuffer());
+
+    // Only replace if the result is actually smaller
+    if (newBytes.length >= jpegData.length) return false;
+
+    // Build a new dictionary with updated dimensions
+    const newDict = imageStream.dict.clone(context);
+    newDict.set(PDFName.of("Width"), context.obj(newW));
+    newDict.set(PDFName.of("Height"), context.obj(newH));
+    newDict.set(PDFName.of("Filter"), PDFName.of("DCTDecode"));
+    newDict.set(PDFName.of("ColorSpace"), PDFName.of("DeviceRGB"));
+    newDict.set(PDFName.of("BitsPerComponent"), context.obj(8));
+    newDict.delete(PDFName.of("DecodeParms"));
+    newDict.delete(PDFName.of("SMask"));
+    newDict.set(PDFName.of("Length"), context.obj(newBytes.length));
+
+    const newStream = PDFRawStream.of(newDict, newBytes);
+    context.assign(ref, newStream);
+
+    return true;
+  } catch {
+    return false;
+  }
 }
 
 self.onmessage = async (e) => {
   try {
     const { file, compressionLevel } = e.data;
-    const { scale, quality } = getCompressionSettings(compressionLevel);
+    const { quality, scaleFactor } = getCompressionSettings(compressionLevel);
 
     const arrayBuffer = await file.arrayBuffer();
-    const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
-    const newPdf = await PDFDocument.create();
-    const totalPages = pdf.numPages;
+    const pdfDoc = await PDFDocument.load(arrayBuffer, {
+      ignoreEncryption: true,
+    });
+    const context = pdfDoc.context;
 
-    for (let pageNum = 1; pageNum <= totalPages; pageNum++) {
-      const page = await pdf.getPage(pageNum);
+    // Find all image XObjects in the PDF
+    const imageEntries = [];
+    context.enumerateIndirectObjects().forEach(([ref, obj]) => {
+      if (obj instanceof PDFRawStream) {
+        const subtype = obj.dict.get(PDFName.of("Subtype"));
+        if (subtype && subtype.toString() === "/Image") {
+          imageEntries.push([ref, obj]);
+        }
+      }
+    });
 
-      // Get original page dimensions (in PDF points at scale=1)
-      const originalViewport = page.getViewport({ scale: 1.0 });
-      // Render at the target scale for quality control
-      const renderViewport = page.getViewport({ scale });
+    let processed = 0;
+    const total = imageEntries.length;
 
-      const canvas = new OffscreenCanvas(
-        Math.floor(renderViewport.width),
-        Math.floor(renderViewport.height)
-      );
-      const ctx = canvas.getContext("2d");
+    for (const [ref, imageStream] of imageEntries) {
+      const filter = imageStream.dict.get(PDFName.of("Filter"));
+      const filterName = filter ? filter.toString() : "";
 
-      ctx.fillStyle = "white";
-      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      // Handle JPEG images (DCTDecode)
+      if (filterName === "/DCTDecode") {
+        await recompressJpegImage(ref, imageStream, quality, scaleFactor, context);
+      }
+      // Other filter types (FlateDecode, JPXDecode, etc.) are left as-is
+      // to preserve quality for non-photographic content
 
-      await page.render({
-        canvasContext: ctx,
-        viewport: renderViewport,
-        canvasFactory,
-      }).promise;
-
-      const blob = await canvas.convertToBlob({
-        type: "image/jpeg",
-        quality,
-      });
-
-      const imageBytes = new Uint8Array(await blob.arrayBuffer());
-      const image = await newPdf.embedJpg(imageBytes);
-
-      // Create page with original dimensions (PDF points)
-      const newPage = newPdf.addPage([
-        originalViewport.width,
-        originalViewport.height,
-      ]);
-      newPage.drawImage(image, {
-        x: 0,
-        y: 0,
-        width: originalViewport.width,
-        height: originalViewport.height,
-      });
-
+      processed++;
       self.postMessage({
         type: "progress",
-        value: Math.round((pageNum / totalPages) * 100),
+        value: Math.round((processed / Math.max(total, 1)) * 100),
       });
     }
 
-    const pdfBytes = await newPdf.save({ useObjectStreams: true });
+    const pdfBytes = await pdfDoc.save({ useObjectStreams: true });
     const resultBlob = new Blob([pdfBytes], { type: "application/pdf" });
 
     self.postMessage({
