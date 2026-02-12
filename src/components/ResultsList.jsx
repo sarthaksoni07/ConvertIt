@@ -19,7 +19,7 @@ export default function ResultsList() {
 
   return (
     <div className="results-container">
-      <h3>🎉 Processed Files ({results.length})</h3>
+      <h3>Processed Files ({results.length})</h3>
       <ul className="results-list">
         {results.map((res, index) => (
           <li key={res.name + index} className="result-item">
