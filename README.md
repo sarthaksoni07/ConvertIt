@@ -41,32 +41,32 @@ Most file conversion tools upload your documents to remote servers — meaning y
 
 ```
 ┌──────────────────────────────────────────────────┐
-│                   Browser Tab                     │
-│                                                   │
+│                   Browser Tab                    │
+│                                                  │
 │  ┌─────────────┐   Context    ┌───────────────┐  │
-│  │  React UI   │◄────────────►│  Custom Hooks  │  │
-│  │  (Views +   │              │  (useCompress, │  │
-│  │  Components)│              │   useConvert,  │  │
-│  └─────────────┘              │   useMerge)    │  │
-│                               └───────┬────────┘  │
-│                                       │            │
-│                              Dynamic Import        │
-│                                       │            │
-│                               ┌───────▼────────┐  │
-│                               │   Services     │  │
-│                               │  (Promise API) │  │
-│                               └───────┬────────┘  │
-│                                       │            │
-│                            postMessage / onmessage │
-│                                       │            │
-│  ┌────────────────────────────────────▼─────────┐ │
-│  │              Web Workers (off main thread)    │ │
-│  │  ┌────────────┐ ┌──────────┐ ┌────────────┐  │ │
-│  │  │ img.worker │ │pdf.worker│ │merge.worker│  │ │
-│  │  └────────────┘ └──────────┘ └────────────┘  │ │
-│  └──────────────────────────────────────────────┘ │
-│                                                   │
-│         ⚠ NOTHING leaves this box ⚠              │
+│  │  React UI   │◄────────────►│  Custom Hooks │  │
+│  │  (Views +   │              │  (useCompress,│  │
+│  │  Components)│              │   useConvert, │  │
+│  └─────────────┘              │   useMerge)   │  │
+│                               └───────┬───────┘  │
+│                                       │          │
+│                              Dynamic Import      │
+│                                       │          │
+│                               ┌───────▼────────┐ │
+│                               │   Services     │ │
+│                               │  (Promise API) │ │
+│                               └───────┬────────┘ │
+│                                       │          │
+│                           postMessage / onmessage│
+│                                       │          │
+│  ┌────────────────────────────────────▼─────────┐│
+│  │              Web Workers (off main thread)   ││
+│  │  ┌────────────┐ ┌──────────┐ ┌────────────┐  ││
+│  │  │ img.worker │ │pdf.worker│ │merge.worker│  ││
+│  │  └────────────┘ └──────────┘ └────────────┘  ││
+│  └──────────────────────────────────────────────┘│
+│                                                  │
+│         ⚠ NOTHING leaves this box ⚠             │
 └──────────────────────────────────────────────────┘
 ```
 

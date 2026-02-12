@@ -2,7 +2,6 @@ name: Ping Website
 
 on:
   schedule:
-    # Runs every 30 minutes
     - cron: "*/25 * * * *"
   workflow_dispatch:  # Allows manual run from GitHub UI
 
