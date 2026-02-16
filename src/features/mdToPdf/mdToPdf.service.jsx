@@ -42,16 +42,58 @@ const CLR = {
 /* ── Helpers ──────────────────────────────────────────────────── */
 
 /** Sanitise text to the WinAnsi range (standard PDF fonts). */
-function san(t) {
-  return t
+const FALLBACK_CHARS = {
+  "\u2190": "<-",
+  "\u2192": "->",
+  "\u2194": "<->",
+  "\u21d2": "=>",
+  "\u2500": "-",
+  "\u2501": "-",
+  "\u2502": "|",
+  "\u250c": "+",
+  "\u2510": "+",
+  "\u2514": "+",
+  "\u2518": "+",
+  "\u251c": "+",
+  "\u2524": "+",
+  "\u252c": "+",
+  "\u2534": "+",
+  "\u253c": "+",
+  "\u2550": "=",
+  "\u2551": "|",
+  "\u2554": "+",
+  "\u2557": "+",
+  "\u255a": "+",
+  "\u255d": "+",
+  "\u2560": "+",
+  "\u2563": "+",
+  "\u2566": "+",
+  "\u2569": "+",
+  "\u256c": "+",
+  "\u2570": "+",
+  "\u256f": "+",
+  "\u256d": "+",
+  "\u256e": "+",
+  "\u2713": "[x]",
+  "\u2717": "[ ]",
+  "\u2022": "*",
+};
+
+function san(t, { preserveNewlines = false } = {}) {
+  const safe = (t || "")
+    .replace(/[\u2190\u2192\u2194\u21d2\u2500-\u257f\u2713\u2717\u2022]/g, (ch) => FALLBACK_CHARS[ch] ?? "")
     .replace(/[\u2018\u2019`\u00B4]/g, "'")
     .replace(/[\u201C\u201D]/g, '"')
     .replace(/\u2014/g, "--")
     .replace(/\u2013/g, "-")
     .replace(/\u2026/g, "...")
     .replace(/\u00A0/g, " ")
-    .replace(/\t/g, "    ")
-    .replace(/[^\x20-\x7E\xA0-\xFF]/g, "");
+    .replace(/\t/g, "    ");
+
+  const nonAnsi = preserveNewlines
+    ? /[^\x20-\x7E\xA0-\xFF\r\n]/g
+    : /[^\x20-\x7E\xA0-\xFF]/g;
+  return safe.replace(nonAnsi, "");
 }
 
 function decEnt(text) {
@@ -167,11 +209,43 @@ class PdfBuilder {
     return def;
   }
 
+  textW(text, font, size) {
+    try { return font.widthOfTextAtSize(text, size); }
+    catch { return 0; }
+  }
+
+  splitToFit(text, font, size, maxWidth) {
+    const out = [];
+    let part = "";
+    let partW = 0;
+
+    for (const ch of text) {
+      const chW = this.textW(ch, font, size);
+      if (part && partW + chW > maxWidth) {
+        out.push(part);
+        part = ch;
+        partW = chW;
+        continue;
+      }
+      if (!part && chW > maxWidth) {
+        out.push(ch);
+        continue;
+      }
+      part += ch;
+      partW += chW;
+    }
+
+    if (part) out.push(part);
+    return out.length ? out : [text];
+  }
+
   /* ── Text wrapping ──
      Takes flat segments and wraps into lines that fit maxWidth.
      Each line = array of { t, f, sz, c, link }.                */
 
-  wrapLines(segments, fontSize, maxWidth, defColor = CLR.text) {
+  wrapLines(segments, fontSize, maxWidth, defColor = CLR.text, opts = {}) {
+    const { keepLeadingSpaces = false } = opts;
+    const usableW = Math.max(8, maxWidth);
     const lines = [[]];
     let lw = 0;
 
@@ -185,44 +259,55 @@ class PdfBuilder {
       const words = seg.t.split(/( +)/);
       for (const w of words) {
         if (!w) continue;
-        let ww;
-        try { ww = f.widthOfTextAtSize(w, sz); }
-        catch { continue; }
-
-        if (lw + ww > maxWidth && lw > 0 && w.trim()) {
-          lines.push([]);
-          lw = 0;
-          if (!w.trim()) continue;
+        const pieces = this.textW(w, f, sz) > usableW ? this.splitToFit(w, f, sz, usableW) : [w];
+        for (const piece of pieces) {
+          const ww = this.textW(piece, f, sz);
+          if (ww <= 0) continue;
+          if (!keepLeadingSpaces && lw === 0 && piece.trim() === "") continue;
+          if (lw + ww > usableW && lw > 0) {
+            lines.push([]);
+            lw = 0;
+            if (!keepLeadingSpaces && piece.trim() === "") continue;
+          }
+          lines[lines.length - 1].push({ t: piece, f, sz, c, link: seg.link });
+          lw += ww;
         }
-        lines[lines.length - 1].push({ t: w, f, sz, c, link: seg.link });
-        lw += ww;
       }
     }
     return lines;
   }
 
+  wrapCodeLine(line, font, size, maxWidth) {
+    if (line.length === 0) return [""];
+    return this.splitToFit(line, font, size, Math.max(8, maxWidth));
+  }
+
   /* ── Drawing helpers ── */
+
+  drawLineAt(line, x, y, drawIcBg = true) {
+    let cx = x;
+    for (const s of line) {
+      const tw = this.textW(s.t, s.f, s.sz);
+      if (tw <= 0) continue;
+
+      if (drawIcBg && s.c === CLR.iCode) {
+        this.page.drawRectangle({
+          x: cx - 2, y: y - 3,
+          width: tw + 4, height: s.sz + 6,
+          color: CLR.iCodeBg,
+        });
+      }
+      try {
+        this.page.drawText(s.t, { x: cx, y, font: s.f, size: s.sz, color: s.c });
+      } catch { /* skip unencodable chars */ }
+      cx += tw;
+    }
+  }
 
   drawLines(lines, x, lineH, drawIcBg = true) {
     for (const line of lines) {
       this.ensure(lineH);
-      let cx = x;
-      for (const s of line) {
-        let tw;
-        try { tw = s.f.widthOfTextAtSize(s.t, s.sz); } catch { continue; }
-
-        if (drawIcBg && s.c === CLR.iCode) {
-          this.page.drawRectangle({
-            x: cx - 2, y: this.y - 3,
-            width: tw + 4, height: s.sz + 6,
-            color: CLR.iCodeBg,
-          });
-        }
-        try {
-          this.page.drawText(s.t, { x: cx, y: this.y, font: s.f, size: s.sz, color: s.c });
-        } catch { /* skip unencodable chars */ }
-        cx += tw;
-      }
+      this.drawLineAt(line, x, this.y, drawIcBg);
       this.y -= lineH;
     }
   }
@@ -305,13 +390,13 @@ class PdfBuilder {
   /* ── Code Block ── */
 
   rCode(tok) {
-    const raw = san(tok.text);
-    const codeLines = raw.split("\n");
+    const raw = san(decEnt(tok.text || ""), { preserveNewlines: true }).replace(/\r\n?/g, "\n");
     const sz = SZ.code;
     const lineH = sz * LH.code;
     const pad = { x: 12, y: 10 };
     const f = this.F.m;
     const maxTextW = CW - pad.x * 2;
+    const codeLines = raw.split("\n").flatMap((line) => this.wrapCodeLine(line, f, sz, maxTextW));
     const totalH = codeLines.length * lineH + pad.y * 2;
 
     const pageH = PAGE_TOP - PAGE_BOT;
@@ -322,12 +407,13 @@ class PdfBuilder {
     }
 
     this.y -= 4;
-    let remaining = [...codeLines];
+    let idx = 0;
 
-    while (remaining.length > 0) {
+    while (idx < codeLines.length) {
       const avail = this.y - PAGE_BOT;
-      const maxOnPage = Math.max(1, Math.floor((avail - pad.y * 2) / lineH));
-      const chunk = remaining.splice(0, maxOnPage);
+      const maxOnPage = Math.floor((avail - pad.y * 2) / lineH);
+      if (maxOnPage <= 0) { this.addPage(); continue; }
+      const chunk = codeLines.slice(idx, idx + maxOnPage);
       const chunkH = chunk.length * lineH + pad.y * 2;
 
       // Dark background
@@ -340,13 +426,9 @@ class PdfBuilder {
       // Code text
       let ty = this.y - pad.y - sz;
       for (const line of chunk) {
-        let display = line;
         try {
-          while (display.length > 0 && f.widthOfTextAtSize(display, sz) > maxTextW) {
-            display = display.slice(0, -1);
-          }
-          if (display) {
-            this.page.drawText(display, {
+          if (line) {
+            this.page.drawText(line, {
               x: MARGIN.left + pad.x, y: ty,
               font: f, size: sz, color: CLR.codeFg,
             });
@@ -356,7 +438,8 @@ class PdfBuilder {
       }
 
       this.y -= chunkH;
-      if (remaining.length > 0) this.addPage();
+      idx += chunk.length;
+      if (idx < codeLines.length) this.addPage();
     }
 
     this.gap(10);
@@ -543,75 +626,94 @@ class PdfBuilder {
     const lineH = sz * LH.table;
     const cellPad = { x: 8, y: 5 };
     const numCols = tok.header.length;
+    if (numCols === 0) return;
 
-    // Measure ideal column widths
-    const colW = new Array(numCols).fill(40);
+    const cellText = (cell) => {
+      if (!cell) return "";
+      if (typeof cell.text === "string") return san(decEnt(cell.text));
+      const segs = this.flatten(cell.tokens ?? []);
+      return segs.map((s) => s.t).join("");
+    };
+
+    const minColW = Math.max(52, CW / numCols * 0.5);
+    const maxColW = Math.max(minColW, CW * 0.65);
+    const colW = new Array(numCols).fill(minColW);
+
     for (let c = 0; c < numCols; c++) {
-      try {
-        const hw = this.F.b.widthOfTextAtSize(san(decEnt(tok.header[c].text || "")), sz);
-        colW[c] = Math.max(colW[c], hw + cellPad.x * 2);
-      } catch { /* */ }
+      const hText = cellText(tok.header[c]);
+      colW[c] = Math.max(colW[c], Math.min(maxColW, this.textW(hText, this.F.b, sz) + cellPad.x * 2));
 
       for (const row of tok.rows) {
-        if (!row[c]) continue;
-        try {
-          const rw = this.F.r.widthOfTextAtSize(san(decEnt(row[c].text || "")), sz);
-          colW[c] = Math.max(colW[c], rw + cellPad.x * 2);
-        } catch { /* */ }
+        const rText = cellText(row[c]);
+        colW[c] = Math.max(colW[c], Math.min(maxColW, this.textW(rText, this.F.r, sz) + cellPad.x * 2));
       }
     }
 
-    // Scale to content width
     const total = colW.reduce((a, b) => a + b, 0);
-    if (total !== CW) {
+    if (total > 0 && Math.abs(total - CW) > 0.01) {
       const scale = CW / total;
       for (let i = 0; i < numCols; i++) colW[i] *= scale;
     }
 
-    const rowH = lineH + cellPad.y * 2;
-    const tableH = rowH * (1 + tok.rows.length);
-    const pageH = PAGE_TOP - PAGE_BOT;
-    if (tableH <= pageH) this.ensure(tableH + 8);
-
     this.y -= 4;
 
-    const drawRow = (cells, isHeader, isEven) => {
-      this.ensure(rowH);
-      let x = MARGIN.left;
+    const rowDefs = [
+      { cells: tok.header, isHeader: true, isEven: false },
+      ...tok.rows.map((cells, i) => ({ cells, isHeader: false, isEven: i % 2 === 1 })),
+    ];
+
+    for (const rowDef of rowDefs) {
+      const wrappedPerCol = [];
+      let maxLines = 1;
+
       for (let c = 0; c < numCols; c++) {
-        const bg = isHeader ? CLR.tHeadBg : isEven ? CLR.tStripe : CLR.white;
-        this.page.drawRectangle({
-          x, y: this.y - rowH, width: colW[c], height: rowH, color: bg,
-        });
-        this.page.drawRectangle({
-          x, y: this.y - rowH, width: colW[c], height: rowH,
-          borderColor: CLR.tBorder, borderWidth: 0.5,
-        });
-
-        if (cells[c]) {
-          const raw = san(decEnt(cells[c].text || ""));
-          const font = isHeader ? this.F.b : this.F.r;
-          const maxW = colW[c] - cellPad.x * 2;
-          let display = raw;
-          try {
-            while (display.length > 1 && font.widthOfTextAtSize(display, sz) > maxW) {
-              display = display.slice(0, -1);
-            }
-            this.page.drawText(display, {
-              x: x + cellPad.x,
-              y: this.y - cellPad.y - sz,
-              font, size: sz,
-              color: isHeader ? CLR.h1 : CLR.text,
-            });
-          } catch { /* skip unencodable */ }
-        }
-        x += colW[c];
+        const cell = rowDef.cells[c];
+        const base = cell?.tokens ?? [{ type: "text", text: cellText(cell) }];
+        const segs = this.flatten(base).map((s) => (rowDef.isHeader ? { ...s, bold: true } : s));
+        const lines = this.wrapLines(
+          segs,
+          sz,
+          colW[c] - cellPad.x * 2,
+          rowDef.isHeader ? CLR.h1 : CLR.text
+        );
+        wrappedPerCol[c] = lines.length ? lines : [[]];
+        maxLines = Math.max(maxLines, wrappedPerCol[c].length);
       }
-      this.y -= rowH;
-    };
 
-    drawRow(tok.header, true, false);
-    tok.rows.forEach((row, i) => drawRow(row, false, i % 2 === 1));
+      let lineOffset = 0;
+      while (lineOffset < maxLines) {
+        const avail = this.y - PAGE_BOT;
+        const maxLinesOnPage = Math.floor((avail - cellPad.y * 2) / lineH);
+        if (maxLinesOnPage <= 0) { this.addPage(); continue; }
+
+        const linesThisChunk = Math.max(1, Math.min(maxLinesOnPage, maxLines - lineOffset));
+        const rowH = linesThisChunk * lineH + cellPad.y * 2;
+        this.ensure(rowH);
+
+        let x = MARGIN.left;
+        for (let c = 0; c < numCols; c++) {
+          const bg = rowDef.isHeader ? CLR.tHeadBg : rowDef.isEven ? CLR.tStripe : CLR.white;
+          this.page.drawRectangle({
+            x, y: this.y - rowH, width: colW[c], height: rowH, color: bg,
+          });
+          this.page.drawRectangle({
+            x, y: this.y - rowH, width: colW[c], height: rowH,
+            borderColor: CLR.tBorder, borderWidth: 0.5,
+          });
+
+          const lines = wrappedPerCol[c].slice(lineOffset, lineOffset + linesThisChunk);
+          let ty = this.y - cellPad.y - sz;
+          for (const line of lines) {
+            this.drawLineAt(line, x + cellPad.x, ty);
+            ty -= lineH;
+          }
+          x += colW[c];
+        }
+
+        this.y -= rowH;
+        lineOffset += linesThisChunk;
+      }
+    }
 
     this.gap(12);
   }
